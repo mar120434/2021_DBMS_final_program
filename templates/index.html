@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q56091045 2021 DBMS</title>
+    <!-- Vue.js cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- axios cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- local style -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        div {
+            text-align: center;
+            margin: auto;
+        }
+        textarea {
+            width: 200px;
+            height: 100px;
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+
+{% raw %}
+
+<div id="app">
+    <div>
+        <h3>求籤、訂吉祥物系統</h3>
+        <p>請在下方輸入 SQL 指令</p>
+    </div>
+    <div>
+        <textarea v-model="msg"></textarea>
+    </div>
+    <div>
+        <button v-on:click="btnclick()">送出</button>
+    </div>
+    <div>
+        <table v-if="showTable">
+            <tr>
+                <th v-for="" :key=""></th>
+            </tr>
+            <tr v-for="" :key="">
+                <td v-for="" :key=""></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+    let app = new Vue({
+        el: "#app",
+        data: {
+            msg: "SELECT * FROM `member`",
+            tableData: {},
+            showTable: false
+        },
+        methods: {
+            btnclick: function() {
+                axios.post("/sql", {
+                    msg: this.msg
+                }).then(response=>{
+                    console.log(response.data)
+                })
+            }
+        },
+        watch: {
+            msg: function () {}
+        }
+    })
+</script>
+
+{% endraw %}
+
+</body>
+</html>
