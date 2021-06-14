@@ -18,11 +18,52 @@
         div {
             text-align: center;
             margin: auto;
+            padding: 10px 0;
+        }
+        select {
+            font-size: 1rem;
+            padding: 3px;
         }
         textarea {
-            width: 200px;
-            height: 100px;
+            width: 60vw;
+            min-width: 400px;
+            height: 150px;
             resize: none;
+            font-size: 1.1rem;
+            padding: 5px;
+        }
+        button {
+            padding: 5px 10px;
+            font-size: 1.2rem;
+        }
+        table {
+            margin: auto;
+            border-spacing: 1px;
+        }
+        th {
+            background-color: #fdd;
+        }
+        td {
+            background-color: #ffa;
+        }
+        th, td {
+            padding: 5px 10px;
+        }
+        .example {
+            background-color: #eef;
+            height: 400px;
+            max-width: 900px;
+            overflow: auto;
+        }
+        .example div {
+            padding: 0;
+        }
+        .example-instroction {
+            padding: 10px 0;
+        }
+        .example-instroction:hover {
+            background-color: #eff;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -32,23 +73,50 @@
 
 <div id="app">
     <div>
-        <h3>求籤、訂吉祥物系統</h3>
-        <p>請在下方輸入 SQL 指令</p>
+        <h2>求籤、訂吉祥物系統</h2>
     </div>
     <div>
+        <p>選擇查詢工具</p>
+        <select v-model="queryType">
+            <option v-for="options in queryOptions" v-bind:value="options.value">
+                {{ options.text }}
+            </option>
+        </select>
+    </div>
+    <div v-if="queryType == 'MySQL'">
+        <p>請在下方輸入 SQL 指令</p>
+    </div>
+    <div v-if="queryType == 'MySQL'">
         <textarea v-model="msg"></textarea>
     </div>
     <div>
-        <button v-on:click="btnclick()">送出</button>
+        <button v-if="queryType == 'MySQL'" v-on:click="btnclick()">送出 sql 指令</button>
+        <button v-if="queryType != 'MySQL'" v-on:click="btnclick()">送出</button>
     </div>
     <div>
+        <h2>範例指令，點擊可以直接複製到文字輸入框中</h2>
+    </div>
+    <div class="example" v-if="queryType == 'MySQL'">
+        <div v-for="data in exampleData" :key="data">
+            <h3>{{ data.title }}</h3>
+            <p class="example-instroction" v-on:click="changeMsg(data.instruction)">{{ data.instruction }}</p>
+        </div>
+    </div>
+    <div>
+        <h3 v-if="showTable">顯示結果</h3>
         <table v-if="showTable">
-            <tr>
-                <th v-for="" :key=""></th>
-            </tr>
-            <tr v-for="" :key="">
-                <td v-for="" :key=""></td>
-            </tr>
+            <thead>
+                <tr>
+                    <th v-for="description in tableDescripe" :key="description"> {{ description }} </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="row in tableRowData" :key="row.id">
+                    <td v-for="item in row" :key="item.id">
+                        {{ item }}
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>
 </div>
@@ -57,21 +125,118 @@
     let app = new Vue({
         el: "#app",
         data: {
-            msg: "SELECT * FROM `member`",
+            queryType: "MySQL",
+            queryOptions: [
+                { text: "MySQL", value: "MySQL" },
+                { text: "會員", value: "member" },
+                { text: "師父", value: "seafood" },
+                { text: "籤詩", value: "sign" },
+                { text: "好物", value: "good" },
+                { text: "訂單", value: "order" },
+                { text: "收藏", value: "collect" },
+                { text: "問籤", value: "divination" }
+            ],
+            msg: "SELECT * FROM `member`;",
             tableData: {},
-            showTable: false
+            tableDescripe: [],
+            tableRowData: [],
+            showTable: false,
+
+            showExample: false,
+            exampleData: [
+                {
+                    title: "查詢會員資料",
+                    instruction: "SELECT * FROM `member`"
+                },
+                {
+                    title: "查詢會員 小明 的年齡",
+                    instruction: "SELECT `memberAge` FROM `member` WHERE `memberName` = \"小明\";"
+                },
+                {
+                    title: "刪除 小明 的資料",
+                    instruction: "DELETE FROM `member` WHERE `memberName` = \"小明\";"
+                },
+                {
+                    title: "插入 阿明 的資料",
+                    instruction: "INSERT INTO `member`( `memberName`, `memberAge` ) VALUES ( \"阿明\", 12 );"
+                },
+                {
+                    title: "修改 阿明 的資料",
+                    instruction: "UPDATE `member` SET `memberName` = \"小明\", `memberAge` = 18 WHERE `memberName` = \"阿明\";"
+                },
+                {
+                    title: "查詢會員 獅子 收藏籤詩的資料",
+                    instruction: "SELECT * FROM `divination` WHERE `divination`.`memberId` IN (SELECT `member`.`memberId` FROM `member` WHERE `member`.`memberName` = \"獅子\");"
+                },
+                {
+                    title: "查詢會員不是 獅子 收藏籤詩的資料",
+                    instruction: "SELECT * FROM `divination` WHERE `divination`.`memberId` NOT IN (SELECT `member`.`memberId` FROM `member` WHERE `member`.`memberName` = \"獅子\");"
+                },
+                {
+                    title: "查詢有訂單的 會員id",
+                    instruction: "SELECT `memberId` FROM `member` WHERE EXISTS (SELECT `memberId` FROM `order` WHERE `member`.`memberId`=`order`.`memberId` );"
+                },
+                {
+                    title: "查詢沒有訂單的 會員id",
+                    instruction: "SELECT `memberId` FROM `member` WHERE NOT EXISTS (SELECT `memberId` FROM `order` WHERE `member`.`memberId`=`order`.`memberId` );"
+                },
+                {
+                    title: "查詢會員id為1的訂單數量",
+                    instruction: "SELECT COUNT(`memberId`) FROM `order` WHERE `memberId`=1;"
+                },
+                {
+                    title: "查詢會員id為2的訂單的產品數量總和",
+                    instruction: "SELECT SUM(`count`) FROM `order` WHERE `memberId`=2;"
+                },
+                {
+                    title: "查詢會員id為2訂單最大的產品數量",
+                    instruction: "SELECT MAX(`count`) FROM `order` WHERE `memberId`=2;"
+                },
+                {
+                    title: "查詢會員id為2訂單最小的產品數量",
+                    instruction: "SELECT MIN(`count`) FROM `order` WHERE `memberId`=2;"
+                },
+                {
+                    title: "查詢會員id為2的訂單的產品數量平均",
+                    instruction: "SELECT AVG(`count`) FROM `order` WHERE `memberId`=2;"
+                },
+                {
+                    title: "查詢會員id為2訂單的產品數量總、最大值、最小值、平均",
+                    instruction: "SELECT COUNT(`count`), MAX(`count`), MIN(`count`), AVG(`count`) FROM `order` WHERE `memberId`=2;"
+                },
+                {
+                    title: "查詢會員id訂單的產品數量總和小於20個",
+                    instruction: "SELECT `memberId`, SUM(`count`) FROM `order` GROUP BY `memberId` HAVING SUM(`count`) < 20;"
+                }
+            ]
         },
         methods: {
             btnclick: function() {
+                if (this.queryType != "MySQL") {
+                    this.msg = "SELECT * FROM `" + this.queryType + "`;"
+                    console.log(this.msg)
+                }
                 axios.post("/sql", {
                     msg: this.msg
                 }).then(response=>{
-                    console.log(response.data)
+                    if (response.data) {
+                        this.showTable = true
+                    }
+                    this.tableData = response.data
+                    this.tableDescripe = this.tableData.descriptions
+                    this.tableRowData = this.tableData.rows
                 })
+            },
+            changeMsg: function(newMsg) {
+                this.msg = newMsg
             }
         },
         watch: {
-            msg: function () {}
+            queryType: function () {
+                this.showTable = {}
+                this.tableDescripe = []
+                this.tableRowData = []
+            }
         }
     })
 </script>
