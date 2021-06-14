@@ -60,9 +60,11 @@
         }
         .example-instroction {
             padding: 10px 0;
+            font-weight: 600;
+            color: #f33;
         }
         .example-instroction:hover {
-            background-color: #eff;
+            background-color: #ddf;
             cursor: pointer;
         }
     </style>
@@ -84,7 +86,7 @@
         </select>
     </div>
     <div v-if="queryType == 'MySQL'">
-        <p>請在下方輸入 SQL 指令</p>
+        <p>請在下方輸入 SQL 指令，結果顯示在最下方</p>
     </div>
     <div v-if="queryType == 'MySQL'">
         <textarea v-model="msg"></textarea>
@@ -93,7 +95,7 @@
         <button v-if="queryType == 'MySQL'" v-on:click="btnclick()">送出 sql 指令</button>
         <button v-if="queryType != 'MySQL'" v-on:click="btnclick()">送出</button>
     </div>
-    <div>
+    <div v-if="queryType == 'MySQL'">
         <h2>範例指令，點擊可以直接複製到文字輸入框中</h2>
     </div>
     <div class="example" v-if="queryType == 'MySQL'">
@@ -146,7 +148,7 @@
             exampleData: [
                 {
                     title: "查詢會員資料",
-                    instruction: "SELECT * FROM `member`"
+                    instruction: "SELECT * FROM `member`;"
                 },
                 {
                     title: "查詢會員 小明 的年齡",
@@ -233,7 +235,7 @@
         },
         watch: {
             queryType: function () {
-                this.showTable = {}
+                this.showTable = false
                 this.tableDescripe = []
                 this.tableRowData = []
             }

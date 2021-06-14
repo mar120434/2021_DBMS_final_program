@@ -1,3 +1,5 @@
+CREATE DATABASE `q56091045`;
+
 CREATE TABLE `member` (
     `memberId` int NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `memberName` varchar(255) NOT NULL,
